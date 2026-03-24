@@ -1,0 +1,126 @@
+{
+  "info": {
+    "_postman_id": "banco-base-collection",
+    "name": "Banco Base API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección Postman para los endpoints de Banco Base (PagoController)"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Crear pago",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"concepto\": \"internet\",\n  \"cantidadProductos\": 1,\n  \"realizaPago\": \"usuarioA\",\n  \"recibePago\": \"proveedorX\",\n  \"monto\": 200.0\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/pagos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "pagos"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Listar pagos (opcional filtro usuario)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/pagos?usuario={{usuario}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "pagos"
+          ],
+          "query": [
+            {
+              "key": "usuario",
+              "value": "usuarioA"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Obtener pago por id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/pagos/:id",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "pagos",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Actualizar status de pago (PATCH)",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/pagos/:id/status?status={{status}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "pagos",
+            ":id",
+            "status"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "1"
+            }
+          ],
+          "query": [
+            {
+              "key": "status",
+              "value": "finalizado"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+
