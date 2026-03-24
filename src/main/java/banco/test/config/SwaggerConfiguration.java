@@ -17,6 +17,6 @@ public class SwaggerConfiguration {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .info(new Info().title(appName).version("v1").description("API documentation"));
+                .info(new Info().title(appName).version("v1").description("API Banco Base documentation"));
     }
 }
