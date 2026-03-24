@@ -1,0 +1,113 @@
+@startuml
+title Secuencias: Endpoints de PagoController (/api/v1)
+skinparam dpi 150
+actor Cliente
+
+participant "PagoController\n(/api/v1/pagos)" as Controller
+participant "UserPagoService" as Service
+participant "PagoRepository\n(JPA)" as Repository
+participant "Base de Datos" as DB
+participant "Kafka Producer\n(Banco_base_topic)" as KafkaProd
+participant "Kafka Broker / Consumer" as KafkaBroker
+
+== POST /api/v1/pagos - crearPago (request: PagoRequestDto) ==
+note right of Cliente #palegreen
+  Request body
+  {
+    "usuario": "string",
+    "monto": 100.0,
+    "moneda": "USD"
+  }
+end note
+Cliente -> Controller : POST /api/v1/pagos\n(body: PagoRequestDto)
+activate Controller
+Controller -> Service : generarPagoUsuario(pagoRequestDto)
+activate Service
+Service -> Repository : save(PagoEntity)
+activate Repository
+Repository -> DB : INSERT pago ...
+DB --> Repository : OK (id generado)
+deactivate DB
+Repository --> Service : PagoEntity (persistido)
+deactivate Repository
+Service -> KafkaProd : publish(topic: Banco_base_topic, payload: PagoEvent)
+activate KafkaProd
+KafkaProd --> KafkaBroker : message to topic
+deactivate KafkaProd
+KafkaBroker --> KafkaBroker : delivered to consumers (async)
+Service --> Controller : PagoResponseDto (201 Created)
+deactivate Service
+Controller --> Cliente : 201 Created
+deactivate Controller
+
+== GET /api/v1/pagos - listarPagos (request: optional ?usuario) ==
+note right of Cliente #lightblue
+  Request example:
+  GET /api/v1/pagos?usuario=juan
+end note
+Cliente -> Controller : GET /api/v1/pagos\n(query: usuario?)
+activate Controller
+Controller -> Service : obtenerTodosPagos/obtenerTodosPagosPorRealizaUsuario(usuario?)
+activate Service
+Service -> Repository : findAll / findByUsuario(usuario)
+activate Repository
+Repository -> DB : SELECT ...
+DB --> Repository : ResultSet
+Repository --> Service : List<PagoEntity>
+deactivate Repository
+Service --> Controller : List<PagoEntity> (200 OK)
+deactivate Service
+Controller --> Cliente : 200 OK
+deactivate Controller
+
+== GET /api/v1/pagos/{id} - obtenerPagoPorId (request: path id) ==
+note right of Cliente #lightyellow
+  Request example:
+  GET /api/v1/pagos/123
+end note
+Cliente -> Controller : GET /api/v1/pagos/123
+activate Controller
+Controller -> Service : obtenerPagoPorId(123)
+activate Service
+Service -> Repository : findById(123)
+activate Repository
+Repository -> DB : SELECT ... WHERE id=123
+DB --> Repository : PagoEntity or empty
+Repository --> Service : PagoEntity
+deactivate Repository
+Service --> Controller : PagoEntity (200 OK)
+deactivate Service
+Controller --> Cliente : 200 OK
+deactivate Controller
+
+== PATCH /api/v1/pagos/{id}/status?status=X - actualizarStatusPago (request: path id, query status) ==
+note right of Cliente #peachpuff
+  Request example:
+  PATCH /api/v1/pagos/123/status?status=COMPLETED
+end note
+Cliente -> Controller : PATCH /api/v1/pagos/123/status?status=COMPLETED
+activate Controller
+Controller -> Service : actualizarStatusPago(123, "COMPLETED")
+activate Service
+Service -> Repository : findById(123)
+activate Repository
+Repository -> DB : SELECT ... WHERE id=123
+DB --> Repository : PagoEntity
+Repository --> Service : PagoEntity
+deactivate Repository
+Service -> Repository : save(updated PagoEntity with new status)
+activate Repository
+Repository -> DB : UPDATE pago SET status='COMPLETED' WHERE id=123
+DB --> Repository : OK
+Repository --> Service : PagoEntity (updated)
+deactivate Repository
+Service -> KafkaProd : publish(topic: Banco_base_topic, payload: PagoStatusChangedEvent)
+activate KafkaProd
+KafkaProd --> KafkaBroker : message to topic
+deactivate KafkaProd
+Service --> Controller : (void) 204 No Content
+deactivate Service
+Controller --> Cliente : 204 No Content
+deactivate Controller
+
+@enduml

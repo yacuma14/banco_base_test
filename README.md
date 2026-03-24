@@ -101,3 +101,19 @@ docker-compose exec broker kafka-console-consumer --bootstrap-server broker:2909
 # Productor de prueba desde consola (dentro del contenedor broker)  
 docker-compose exec broker kafka-console-producer --broker-list broker:29092 --topic Banco_base_topic  
 ```
+
+## Diagrama de secuencia: POST /api/v1/pagos
+
+En el siguiente diagrama se muestra el flujo al crear un pago: la petición llega a `PagoController`, pasa a `PagoService`, se persiste con `PagoRepository` en la base de datos y, después, el servicio consulta/notifica el endpoint `/api/v1/pagos/{id}/status`.
+
+![Diagrama de secuencia pagos](./docs/pagos-sequence-v2.png)
+
+Descripción rápida:
+
+- Cliente: origen de la petición (frontend, Postman, etc.).
+- `PagoController` (`/api/v1/pagos`): recibe la solicitud y delega a la capa de servicio.
+- `PagoService`: lógica de negocio; persiste la entidad y, tras confirmar la persistencia, realiza la llamada al endpoint de estado.
+- `PagoRepository`: interfaz JPA que persiste la entidad en la base de datos.
+- `Base de Datos`: almacena el pago y devuelve el ID generado.
+- `StatusEndpoint` (`/api/v1/pagos/{id}/status`): endpoint consultado/llamado tras la persistencia para obtener o actualizar el estado del pago.
+
