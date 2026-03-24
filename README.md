@@ -106,7 +106,7 @@ docker-compose exec broker kafka-console-producer --broker-list broker:29092 --t
 
 En el siguiente diagrama se muestra el flujo al crear un pago: la petición llega a `PagoController`, pasa a `PagoService`, se persiste con `PagoRepository` en la base de datos y, después, el servicio consulta/notifica el endpoint `/api/v1/pagos/{id}/status`.
 
-![Diagrama de secuencia pagos](./docs/pagos-sequence-v2.png)
+![Diagrama de secuencia pagos](diagram/pagos-sequence-v2.png)
 
 Descripción rápida:
 
