@@ -41,7 +41,6 @@ mvn clean compile package spring-boot:run
 3) URL de Swagger / OpenAPI
 
 - Swagger UI (interfaz): http://localhost:8081/swagger-ui/index.html
-- URL que solicitaste (compatibilidad/alias): http://localhost:8081/swagger-ui.html#/
 - Especificación OpenAPI (JSON): http://localhost:8081/v3/api-docs
 
 Si la UI no aparece, asegúrate de que la aplicación está arrancada y que el puerto en `src/main/resources/application.properties` es `8081`.
